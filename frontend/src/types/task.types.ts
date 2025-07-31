@@ -1,8 +1,6 @@
-export type TaskStatus = 'pending' | 'done';
-
-export interface Task {
-    id: number;
+export type Task = {
+    id: string;
     title: string;
     description: string;
-    status: TaskStatus;
-}
+    status: 'pending' | 'done';
+};

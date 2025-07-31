@@ -1,25 +1,31 @@
-import { Task } from '../Types/task.types';
-import { tasks, getNextId } from '../Models/task.model';
+import { randomUUID } from 'crypto';
+import {Task} from "../Types/task.types";
 
-export function getTasks(): Task[] {
-    return tasks;
-}
+let tasks: Task[] = [];
 
-export function createTask(data: Omit<Task, 'id'>): Task {
-    const newTask: Task = { ...data, id: getNextId() }; // Utilisation de la fonction
+export const getTasks = () => tasks;
+
+export const createTask = ({ title, description }: { title: string; description: string }) => {
+    const newTask: Task = {
+        id: randomUUID(),
+        title,
+        description,
+        status: 'pending',
+    };
     tasks.push(newTask);
     return newTask;
-}
+};
 
-export function deleteTask(id: number): void {
-    const index = tasks.findIndex(t => t.id === id);
-    if (index === -1) throw new Error('Tâche non trouvée');
+export const deleteTask = (id: string) => {
+    const index = tasks.findIndex((t) => t.id === id);
+    if (index === -1) return false;
     tasks.splice(index, 1);
-}
+    return true;
+};
 
-export function updateTaskStatus(id: number, status: Task['status']): Task {
-    const task = tasks.find(t => t.id === id);
-    if (!task) throw new Error('Tâche non trouvée');
+export const updateTaskStatus = (id: string, status: 'pending' | 'done') => {
+    const task = tasks.find((t) => t.id === id);
+    if (!task) return null;
     task.status = status;
     return task;
-}
+};

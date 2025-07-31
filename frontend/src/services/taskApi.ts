@@ -1,23 +1,11 @@
-import axios from "axios";
-import { Task } from "../types/task.types";
+import axios from 'axios';
+import {Task} from "../types/task.types";
 
-const BASE_URL = "http://localhost:3001"; // Corrigé l'espace en trop
+const api = axios.create({
+    baseURL: 'http://localhost:3001/tasks',
+});
 
-export const fetchTasks = async (): Promise<Task[]> => {
-    const res = await axios.get(`${BASE_URL}/tasks`); // Assure-toi que l'endpoint soit correct
-    return res.data;
-};
-
-export const createTask = async (data: Omit<Task, "id" | "createdAt">): Promise<Task> => {
-    const res = await axios.post(`${BASE_URL}/tasks`, data);
-    return res.data;
-};
-
-export const updateTask = async (id: number, data: Partial<Task>): Promise<Task> => {
-    const res = await axios.patch(`${BASE_URL}/tasks/${id}`, data);
-    return res.data;
-};
-
-export const deleteTask = async (id: number): Promise<void> => {
-    await axios.delete(`${BASE_URL}/tasks/${id}`);
-};
+export const getTasks = () => api.get<Task[]>('/');
+export const createTask = (data: Omit<Task, 'id' | 'status'>) => api.post<Task>('/', data);
+export const deleteTask = (id: string | number) => api.delete(`/${id}`);
+export const updateTaskStatus = (id: string | number, status: 'pending' | 'done') => api.patch(`/${id}`, { status });

@@ -1,61 +1,32 @@
-import React, { useState } from 'react';
-import { createTask } from "../services/taskApi";
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const schema = z.object({
+    title: z.string().min(1),
+    description: z.string().min(1),
+});
+
+type FormValues = z.infer<typeof schema>;
 
 type Props = {
-    onTaskCreated: () => void; // Callback à appeler après la création
+    onAdd: (data: FormValues) => void;
 };
 
-const TaskForm: React.FC<Props> = ({ onTaskCreated }) => {
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [error, setError] = useState<string | null>(null);
+export default function TaskForm({ onAdd }: Props) {
+    const { register, handleSubmit, reset } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            await createTask({ title, description, status: 'pending' });
-            onTaskCreated(); // Rafraîchissement de la liste après création
-            setTitle('');
-            setDescription('');
-        } catch (err) {
-            setError('Erreur lors de la création de la tâche');
-        }
+    const onSubmit = (data: FormValues) => {
+        onAdd(data);
+        reset();
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            <input
-                type="text"
-                placeholder="Titre"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                style={{
-                    fontSize: '16px',  // Taille du texte à l'intérieur du champ
-                    height: '40px',    // Hauteur du champ d'entrée
-                    padding: '8px',    // Espacement à l'intérieur du champ
-                    marginBottom: '12px', // Espacement en bas
-                    width: '100%'      // Prend toute la largeur disponible
-                }}
-            />
-            <textarea
-                placeholder="Description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                style={{
-                    fontSize: '16px',  // Taille du texte à l'intérieur de la zone de texte
-                    height: '100px',   // Hauteur de la zone de texte
-                    padding: '8px',    // Espacement à l'intérieur de la zone de texte
-                    width: '100%',     // Prend toute la largeur disponible
-                    marginBottom: '12px' // Espacement en bas
-                }}
-            />
-            <button type="submit" style={{ fontSize: '16px', padding: '10px 20px', borderRadius: '8px' }}>
-                Ajouter
-            </button>
+        <form onSubmit={handleSubmit(onSubmit)}>
+            <input {...register('title')} placeholder="Title" />
+            <input {...register('description')} placeholder="Description" />
+            <button type="submit">Add Task</button>
         </form>
     );
-};
-
-export default TaskForm;
+}
